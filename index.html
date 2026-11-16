@@ -1,0 +1,732 @@
+<html><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Donut Trade Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap">
+<style>
+/* Concept: neon arcade night. Sprinkles drift over a glowing mesh, an offers ticker runs along the top, cards tilt and shine. Dark first, with a frosted-pink light mode. */
+:root {
+  --bg: #0f0b1a;
+  --surface: #1a1530;
+  --surface2: #231b40;
+  --ink: #f6f0ff;
+  --muted: #b0a3cf;
+  --line: #3a2f5e;
+  --accent: #ff5fa8;
+  --accent2: #3de8c8;
+  --gold: #ffc857;
+  --accent-ink: #2a0620;
+  --sell: #3de8c8;
+  --sell-bg: #0f3a36;
+  --buy: #ffc857;
+  --buy-bg: #3d2e0c;
+  --danger: #ff8a8a;
+  --glow1: rgba(255, 95, 168, 0.24);
+  --glow2: rgba(61, 232, 200, 0.14);
+  --glow3: rgba(167, 139, 250, 0.22);
+  --shadow: rgba(255, 95, 168, 0.35);
+  --font-display: "Pixelify Sans", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #fff3f8; --surface: #ffffff; --surface2: #ffeaf3; --ink: #2a1636; --muted: #7a5f8c; --line: #f0cde0;
+    --accent: #d81b7a; --accent2: #00a58a; --gold: #b36b00; --accent-ink: #ffffff;
+    --sell: #00785f; --sell-bg: #d6f5ec; --buy: #8a5200; --buy-bg: #ffeccc; --danger: #c62828;
+    --glow1: rgba(255, 95, 168, 0.3); --glow2: rgba(61, 232, 200, 0.24); --glow3: rgba(255, 200, 87, 0.34);
+    --shadow: rgba(216, 27, 122, 0.3);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #fff3f8; --surface: #ffffff; --surface2: #ffeaf3; --ink: #2a1636; --muted: #7a5f8c; --line: #f0cde0;
+  --accent: #d81b7a; --accent2: #00a58a; --gold: #b36b00; --accent-ink: #ffffff;
+  --sell: #00785f; --sell-bg: #d6f5ec; --buy: #8a5200; --buy-bg: #ffeccc; --danger: #c62828;
+  --glow1: rgba(255, 95, 168, 0.3); --glow2: rgba(61, 232, 200, 0.24); --glow3: rgba(255, 200, 87, 0.34);
+  --shadow: rgba(216, 27, 122, 0.3);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  position: relative; overflow-x: hidden;
+}
+/* drifting colour mesh behind everything */
+body::before {
+  content: ""; position: fixed; inset: -25%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 38% at 18% 22%, var(--glow1), transparent 70%),
+    radial-gradient(34% 34% at 82% 28%, var(--glow2), transparent 70%),
+    radial-gradient(42% 42% at 52% 92%, var(--glow3), transparent 70%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from { transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1); }
+  to { transform: translate3d(4%, 3%, 0) rotate(8deg) scale(1.12); }
+}
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* header */
+header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.logo { width: 58px; height: 58px; flex: 0 0 auto; animation: spin 22s linear infinite; filter: drop-shadow(0 6px 14px var(--shadow)); }
+.logo:hover { animation-duration: 3s; }
+@keyframes spin { to { transform: rotate(360deg); } }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 6vw, 44px); line-height: 1.05; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+.grad { color: var(--accent); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .grad {
+    background: linear-gradient(90deg, var(--accent), var(--gold), var(--accent2), var(--accent));
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: flow 8s linear infinite;
+  }
+}
+@keyframes flow { to { background-position: 300% 0; } }
+.sub { margin: 6px 0 0; color: var(--muted); max-width: 50ch; }
+.head-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.stats span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; background: var(--surface); box-shadow: 0 0 18px -6px var(--shadow); }
+.stats b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.fxbtn { font-family: var(--font-mono); font-size: 12px; border-radius: 999px; padding: 5px 11px; }
+.fxbtn[aria-pressed="true"] { border-color: var(--accent2); color: var(--accent2); }
+
+/* offers ticker */
+.ticker { overflow: hidden; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.track { display: flex; width: max-content; animation: tick var(--dur, 40s) linear infinite; }
+.ticker:hover .track { animation-play-state: paused; }
+.half { display: flex; flex: 0 0 auto; }
+@keyframes tick { to { transform: translateX(-50%); } }
+.tk { display: inline-flex; align-items: center; gap: 8px; padding: 9px 0 9px 18px; white-space: nowrap; font-family: var(--font-mono); font-size: 13px; }
+.tk::after { content: "\25C6"; color: var(--line); margin-left: 18px; }
+.tk .t { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; border-radius: 4px; padding: 2px 6px; }
+.tk .t.sell { background: var(--sell-bg); color: var(--sell); }
+.tk .t.buy { background: var(--buy-bg); color: var(--buy); }
+.tk .p { color: var(--gold); font-weight: 700; }
+.tk .n { color: var(--muted); }
+
+.layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 859px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* left column scrolls as one piece, so the safety box is never covered */
+.side { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 4px; scrollbar-width: thin; }
+@media (max-width: 859px) { .side { position: static; max-height: none; overflow: visible; padding: 0; } }
+
+.panel { background: linear-gradient(160deg, var(--surface), var(--surface2)); border: 1px solid var(--line); border-radius: 14px; transition: box-shadow 0.3s, border-color 0.3s; }
+.post:focus-within { border-color: var(--accent); box-shadow: 0 0 30px -8px var(--shadow); }
+.post summary { list-style: none; cursor: pointer; padding: 14px 16px; font-family: var(--font-display); font-weight: 700; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
+.post summary::-webkit-details-marker { display: none; }
+.post summary::after { content: "+"; font-family: var(--font-mono); color: var(--accent); font-size: 22px; transition: transform 0.3s; }
+.post[open] summary::after { content: "\2013"; }
+form { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+label, .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+input[type="text"], select {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; min-width: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow1); outline: none; }
+input[type="text"]::placeholder { color: var(--muted); opacity: 0.75; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; position: relative; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { margin: 0; padding: 10px; text-align: center; cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--ink); background: var(--bg); transition: background 0.25s, color 0.25s; }
+.seg input:checked + label { background: linear-gradient(110deg, var(--accent), #ff8a5c); color: var(--accent-ink); font-weight: 700; }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
+.preview { font-family: var(--font-mono); font-size: 13px; color: var(--muted); min-height: 20px; margin-top: 4px; }
+.preview.ok { color: var(--sell); }
+.preview.bad { color: var(--danger); }
+button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 8px 12px; transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s; }
+button:hover { border-color: var(--accent); }
+button:active { transform: scale(0.96); }
+button.primary {
+  background: linear-gradient(110deg, var(--accent), #ff8a5c, var(--accent)); background-size: 220% 100%;
+  color: var(--accent-ink); border-color: transparent; font-weight: 700; padding: 12px 14px; letter-spacing: 0.02em;
+  transition: background-position 0.5s, transform 0.15s, box-shadow 0.3s;
+}
+button.primary:hover { background-position: 100% 0; box-shadow: 0 10px 26px -8px var(--shadow); transform: translateY(-1px); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.msg { font-size: 13px; color: var(--muted); }
+.msg.err { color: var(--danger); }
+.notice { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+.rules { padding: 14px 16px; font-size: 13px; color: var(--muted); }
+.rules h2 { font-family: var(--font-display); font-size: 17px; margin: 0 0 8px; color: var(--accent2); }
+.rules ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+
+/* board */
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.chips { display: flex; gap: 6px; }
+.chip { border-radius: 999px; padding: 6px 13px; font-size: 13px; }
+.chip[aria-pressed="true"] { background: linear-gradient(110deg, var(--accent), #ff8a5c); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+.toolbar input[type="text"] { flex: 1 1 160px; width: auto; }
+.toolbar select { width: auto; flex: 0 0 auto; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.card {
+  position: relative; background: linear-gradient(160deg, var(--surface), var(--surface2));
+  border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+  transition: transform 0.15s ease-out, box-shadow 0.3s, border-color 0.3s;
+}
+.card.enter { animation: rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: none; } }
+.card:hover { --lift: -4px; border-color: var(--accent); box-shadow: 0 16px 36px -14px var(--shadow); }
+.card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.14) 50%, transparent 60%);
+  background-size: 260% 100%; background-position: 130% 0; transition: background-position 0.7s;
+}
+.card:hover::after { background-position: -30% 0; }
+.card.mine::before {
+  content: ""; position: absolute; inset: -1px; border-radius: 15px; padding: 1px; pointer-events: none;
+  background: linear-gradient(120deg, var(--accent), var(--accent2), var(--gold), var(--accent)); background-size: 300% 100%;
+  animation: flow 6s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.card.old { opacity: 0.6; }
+.card.pulse { animation: pulse 1.8s ease-out; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--shadow); } 70% { box-shadow: 0 0 0 18px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.card .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pill { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 5px; padding: 3px 8px; }
+.pill.sell { background: var(--sell-bg); color: var(--sell); }
+.pill.buy { background: var(--buy-bg); color: var(--buy); }
+.badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 5px; padding: 3px 7px; border: 1px solid currentColor; }
+.badge.new { color: var(--accent2); display: inline-flex; align-items: center; gap: 5px; }
+.badge.new::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: 0.25; transform: scale(0.7); } }
+.badge.whale { color: var(--gold); }
+.age { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.what { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.2; overflow-wrap: anywhere; }
+.price { font-family: var(--font-mono); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; color: var(--gold); }
+.price.whale {
+  background: linear-gradient(90deg, var(--gold), var(--accent), var(--accent2), var(--gold)); background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+  animation: flow 5s linear infinite;
+}
+.price small { display: block; font-size: 12px; font-weight: 500; color: var(--muted); -webkit-text-fill-color: currentColor; }
+.note { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.who { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--line); }
+.ign { font-family: var(--font-mono); font-weight: 700; font-size: 14px; user-select: all; overflow-wrap: anywhere; min-width: 0; color: var(--accent2); }
+.who .btns { display: flex; gap: 6px; flex: 0 0 auto; position: relative; z-index: 1; }
+.who button { padding: 5px 9px; font-size: 13px; }
+.who button.del { color: var(--danger); }
+.empty { border: 1px dashed var(--line); border-radius: 14px; padding: 32px 18px; text-align: center; color: var(--muted); background: var(--surface); }
+.empty strong { display: block; font-family: var(--font-display); color: var(--ink); font-size: 22px; margin-bottom: 4px; }
+.empty .bob { display: inline-block; width: 40px; height: 40px; margin-bottom: 8px; animation: bob 2.4s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-8px) rotate(8deg); } }
+#toast { position: fixed; left: 50%; transform: translate(-50%, 12px) scale(0.9); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.3s cubic-bezier(0.2, 1.4, 0.4, 1); z-index: 20; }
+#toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+
+/* effects off: the page toggle, or the system "reduce motion" setting */
+body.fx-off *, body.fx-off *::before, body.fx-off *::after { animation: none !important; transition: none !important; }
+body.fx-off #fx { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  #fx, .fxbtn { display: none; }
+  .ticker { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+}
+</style>
+
+<canvas id="fx" aria-hidden="true" width="517" height="733"></canvas>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+        <defs><mask id="donutHole"><rect width="64" height="64" fill="#fff"></rect><circle cx="32" cy="32" r="9" fill="#000"></circle></mask></defs>
+        <g mask="url(#donutHole)">
+          <circle cx="32" cy="32" r="29" fill="#e9a94b"></circle>
+          <circle cx="32" cy="32" r="24" fill="#ff5fa8"></circle>
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#ff9ccb" stroke-width="3" stroke-dasharray="40 110" stroke-linecap="round"></circle>
+        </g>
+        <rect x="12" y="22" width="8" height="3" rx="1.5" fill="#3de8c8" transform="rotate(-32 16 23)"></rect>
+        <rect x="40" y="12" width="8" height="3" rx="1.5" fill="#ffc857" transform="rotate(28 44 13)"></rect>
+        <rect x="46" y="38" width="8" height="3" rx="1.5" fill="#ffffff" transform="rotate(-50 50 39)"></rect>
+        <rect x="22" y="46" width="8" height="3" rx="1.5" fill="#a78bfa" transform="rotate(18 26 47)"></rect>
+        <rect x="14" y="36" width="7" height="3" rx="1.5" fill="#ffc857" transform="rotate(64 17 37)"></rect>
+        <rect x="30" y="12" width="7" height="3" rx="1.5" fill="#ffffff" transform="rotate(-10 33 13)"></rect>
+      </svg>
+      <div>
+        <h1>Donut <span class="grad">Trade</span> Board</h1>
+        <p class="sub">Post what you want to buy or sell for DonutSMP money. Other players find your offer here and settle the deal in game.</p>
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="stats" id="stats" aria-live="polite" hidden=""><span><b>0</b><span style="border: 0px; padding: 0px; background: none; box-shadow: none;"> selling</span></span><span><b>0</b><span style="border: 0px; padding: 0px; background: none; box-shadow: none;"> buying</span></span><span><b>0</b><span style="border: 0px; padding: 0px; background: none; box-shadow: none;"> players</span></span></div>
+      <button type="button" class="fxbtn" id="fxBtn" aria-pressed="true">Effects on</button>
+    </div>
+  </header>
+
+  <div class="ticker" id="ticker" aria-hidden="true" hidden=""><div class="track" id="track"></div></div>
+
+  <div class="layout">
+    <aside class="side">
+      <details class="panel post" id="postBox" open="">
+        <summary>Post an offer</summary>
+        <form id="form" autocomplete="off" novalidate="">
+          <div>
+            <span class="lbl">I am</span>
+            <div class="seg" role="radiogroup" aria-label="Offer type">
+              <input type="radio" name="side" id="sideSell" value="sell" checked="" disabled=""><label for="sideSell">Selling</label>
+              <input type="radio" name="side" id="sideBuy" value="buy" disabled=""><label for="sideBuy">Buying</label>
+            </div>
+          </div>
+          <div>
+            <label for="what">What</label>
+            <input type="text" id="what" maxlength="60" placeholder="e.g. Full netherite set, 64 spawners" disabled="">
+          </div>
+          <div>
+            <label for="price" id="priceLbl">Price</label>
+            <input type="text" id="price" inputmode="decimal" maxlength="14" placeholder="e.g. 2.5m, 750k, 1b" disabled="">
+            <div class="preview" id="preview">Use k, m, b or t after the number.</div>
+          </div>
+          <div>
+            <label for="ign">Your in-game name</label>
+            <input type="text" id="ign" maxlength="17" placeholder="Minecraft username" disabled="">
+          </div>
+          <div>
+            <label for="note">Note (optional)</label>
+            <input type="text" id="note" maxlength="120" placeholder="e.g. online evenings, can trade at spawn" disabled="">
+          </div>
+          <button type="submit" class="primary" id="postBtn" disabled="">Post offer</button>
+          <div class="msg" id="formMsg" role="status">Posting is unavailable here.</div>
+        </form>
+      </details>
+      <div class="panel rules">
+        <h2>Trade safely</h2>
+        <ul>
+          <li>Money only moves in game. This page never handles payments.</li>
+          <li>Do not trade for real money, gift cards or account logins.</li>
+          <li>Check the username spelling, then agree the deal in game chat before anyone pays.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <main>
+      <div class="toolbar">
+        <div class="chips" role="group" aria-label="Filter offers">
+          <button class="chip" type="button" data-side="all" aria-pressed="true">All</button>
+          <button class="chip" type="button" data-side="sell" aria-pressed="false">Selling</button>
+          <button class="chip" type="button" data-side="buy" aria-pressed="false">Buying</button>
+        </div>
+        <input type="text" id="q" placeholder="Search item or player" aria-label="Search offers">
+        <select id="sort" aria-label="Sort offers">
+          <option value="new">Newest</option>
+          <option value="low">Price: low to high</option>
+          <option value="high">Price: high to low</option>
+        </select>
+      </div>
+      <div id="notice" class="notice">The shared board is not available in this view. Open the page from its link to see offers.</div>
+      <div class="grid" id="grid"></div>
+      <div id="empty" class="empty"><span class="bob"><svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="#ff5fa8"></circle><circle cx="32" cy="32" r="10" fill="#e9a94b"></circle></svg></span><strong>Loading the board</strong>Offers from other players appear here.</div>
+    </main>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var MAX_PER_PLAYER = 20, OLD_MS = 7 * 24 * 3600 * 1000, NEW_MS = 10 * 60 * 1000;
+  var db = null, uid = null, canWrite = true, loaded = false, firstLoad = true;
+  var rows = [], myItems = [], traders = 0;
+  var view = { side: "all", q: "", sort: "new" };
+  var chain = Promise.resolve();
+  var seen = {}, pulse = {}, tickSig = "";
+  var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+
+  /* ---------- helpers ---------- */
+  var SUF = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 };
+  function parseAmt(s) {
+    var m = String(s).trim().replace(/[$,_\s]/g, "").match(/^(\d*\.?\d+)([kmbt])?$/i);
+    if (!m) return null;
+    var n = parseFloat(m[1]) * (m[2] ? SUF[m[2].toLowerCase()] : 1);
+    return isFinite(n) && n > 0 && n < 1e15 ? Math.round(n) : null;
+  }
+  function shortAmt(n) {
+    var u = [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
+    for (var i = 0; i < u.length; i++) {
+      if (n >= u[i][0]) {
+        var x = n / u[i][0];
+        x = x >= 100 ? Math.round(x) : Math.round(x * 100) / 100;
+        return x + u[i][1];
+      }
+    }
+    return String(n);
+  }
+  function full(n) { return Number(n).toLocaleString("en-US"); }
+  function ago(ts) {
+    var s = Math.max(0, (Date.now() - ts) / 1000);
+    if (s < 90) return "just now";
+    if (s < 3600) return Math.round(s / 60) + " min ago";
+    if (s < 86400) return Math.round(s / 3600) + " h ago";
+    return Math.round(s / 86400) + " d ago";
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  var toastTimer;
+  function toast(t) {
+    var n = $("toast");
+    n.textContent = t; n.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { n.classList.remove("show"); }, 2200);
+  }
+  function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function fxOn() { return !document.body.classList.contains("fx-off") && !RM.matches; }
+
+  /* ---------- sprinkles + confetti canvas ---------- */
+  var cv = $("fx"), cx = cv.getContext ? cv.getContext("2d") : null;
+  var COLORS = ["#ff5fa8", "#3de8c8", "#ffc857", "#a78bfa", "#ff8a5c", "#5ec2ff"];
+  var parts = [], W = 0, H = 0, running = false;
+  function sizeCanvas() {
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    if (cx) cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function rc() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
+  function ambient(top) {
+    return { amb: true, x: Math.random() * W, y: top ? -12 : Math.random() * H, vx: (Math.random() - 0.5) * 0.3, vy: 0.25 + Math.random() * 0.55,
+      rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.03, len: 7 + Math.random() * 6, w: 2.6, c: rc(), a: 0.3 + Math.random() * 0.3 };
+  }
+  function fillAmbient() {
+    var want = W < 600 ? 16 : 32, have = 0, i;
+    for (i = 0; i < parts.length; i++) if (parts[i].amb) have++;
+    for (; have < want; have++) parts.push(ambient(false));
+  }
+  function burst(x, y) {
+    if (!cx || !fxOn()) return;
+    for (var i = 0; i < 46; i++) {
+      var ang = Math.random() * 6.28, sp = 3 + Math.random() * 7;
+      parts.push({ amb: false, x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 4, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4,
+        len: 8 + Math.random() * 7, w: 3, c: rc(), a: 1, life: 80 + Math.random() * 40, max: 120 });
+    }
+    start();
+  }
+  function frame() {
+    if (!cx || !fxOn() || document.hidden) { running = false; cx && cx.clearRect(0, 0, W, H); return; }
+    cx.clearRect(0, 0, W, H);
+    cx.lineCap = "round";
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if (p.amb) {
+        if (p.y > H + 14) { parts[i] = ambient(true); continue; }
+      } else {
+        p.vy += 0.2; p.vx *= 0.99; p.life--;
+        p.a = Math.max(0, p.life / p.max);
+        if (p.life <= 0) { parts.splice(i, 1); continue; }
+      }
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot);
+      cx.globalAlpha = p.a; cx.strokeStyle = p.c; cx.lineWidth = p.w;
+      cx.beginPath(); cx.moveTo(-p.len / 2, 0); cx.lineTo(p.len / 2, 0); cx.stroke();
+      cx.restore();
+    }
+    requestAnimationFrame(frame);
+  }
+  function start() { if (running || !cx || !fxOn() || document.hidden) return; running = true; requestAnimationFrame(frame); }
+  function applyFx(on) {
+    document.body.classList.toggle("fx-off", !on);
+    var b = $("fxBtn"); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Effects on" : "Effects off";
+    if (on) { fillAmbient(); start(); } else if (cx) { cx.clearRect(0, 0, W, H); }
+  }
+  sizeCanvas();
+  window.addEventListener("resize", function () { sizeCanvas(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) start(); });
+  var stored = lsGet("donut-fx");
+  applyFx(stored ? stored === "1" : true);
+  $("fxBtn").addEventListener("click", function () {
+    var on = document.body.classList.contains("fx-off");
+    lsSet("donut-fx", on ? "1" : "0"); applyFx(on);
+  });
+
+  /* ---------- stats with count-up ---------- */
+  var statEls = {};
+  [["sell", "selling"], ["buy", "buying"], ["traders", "players"]].forEach(function (p) {
+    var s = el("span"), b = el("b", null, "0"), l = el("span", null, " " + p[1]);
+    l.style.cssText = "border:0;padding:0;background:none;box-shadow:none";
+    s.appendChild(b); s.appendChild(l); $("stats").appendChild(s);
+    statEls[p[0]] = { b: b, l: l, v: 0, raf: 0 };
+  });
+  function setStat(k, n) {
+    var s = statEls[k], from = s.v, t0 = performance.now();
+    s.v = n;
+    cancelAnimationFrame(s.raf);
+    if (k === "traders") s.l.textContent = n === 1 ? " player" : " players";
+    if (!fxOn() || from === n) { s.b.textContent = String(n); return; }
+    function step(t) {
+      var kk = Math.min(1, (t - t0) / 600);
+      s.b.textContent = String(Math.round(from + (n - from) * (1 - Math.pow(1 - kk, 3))));
+      if (kk < 1) s.raf = requestAnimationFrame(step);
+    }
+    s.raf = requestAnimationFrame(step);
+  }
+
+  /* ---------- rendering ---------- */
+  function setNotice(text) {
+    var n = $("notice");
+    n.hidden = !text;
+    n.textContent = text || "";
+  }
+  function renderTicker() {
+    var top = rows.slice().sort(function (a, b) { return b.ts - a.ts; }).slice(0, 12);
+    var sig = top.map(function (r) { return r.owner + r.id; }).join("|");
+    if (sig === tickSig) return;
+    tickSig = sig;
+    var box = $("ticker"), track = $("track");
+    track.textContent = "";
+    if (!top.length) { box.hidden = true; return; }
+    box.hidden = false;
+    for (var h = 0; h < 2; h++) {
+      var half = el("div", "half");
+      top.forEach(function (r) {
+        var t = el("span", "tk");
+        t.appendChild(el("span", "t " + r.side, r.side === "sell" ? "SELL" : "BUY"));
+        t.appendChild(el("span", null, r.what));
+        t.appendChild(el("span", "p", "$" + shortAmt(r.price)));
+        t.appendChild(el("span", "n", r.ign));
+        half.appendChild(t);
+      });
+      track.appendChild(half);
+    }
+    track.style.setProperty("--dur", Math.max(24, top.length * 6) + "s");
+  }
+  function render(opts) {
+    opts = opts || {};
+    var sell = 0, buy = 0;
+    rows.forEach(function (r) { if (r.side === "sell") sell++; else buy++; });
+    $("stats").hidden = !loaded;
+    if (loaded) { setStat("sell", sell); setStat("buy", buy); setStat("traders", traders); }
+    renderTicker();
+    var q = view.q.trim().toLowerCase();
+    var list = rows.filter(function (r) {
+      if (view.side !== "all" && r.side !== view.side) return false;
+      if (!q) return true;
+      return (r.what + " " + r.ign + " " + (r.note || "")).toLowerCase().indexOf(q) !== -1;
+    });
+    list.sort(function (a, b) {
+      if (view.sort === "low") return a.price - b.price;
+      if (view.sort === "high") return b.price - a.price;
+      return b.ts - a.ts;
+    });
+    var grid = $("grid"), empty = $("empty");
+    grid.textContent = "";
+    list.forEach(function (r, i) {
+      var key = r.owner + ":" + r.id;
+      var anim = opts.all || !seen[key];
+      seen[key] = 1;
+      grid.appendChild(card(r, anim ? Math.min(i, 14) : -1));
+    });
+    if (!list.length) {
+      empty.hidden = false; empty.textContent = "";
+      var bob = el("span", "bob"); bob.innerHTML = '<svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="#ff5fa8"/><circle cx="32" cy="32" r="10" fill="#e9a94b"/></svg>';
+      empty.appendChild(bob);
+      if (!loaded) { empty.appendChild(el("strong", null, "Loading the board")); empty.appendChild(document.createTextNode("Offers from other players appear here.")); }
+      else if (!rows.length) { empty.appendChild(el("strong", null, "No offers yet")); empty.appendChild(document.createTextNode("Post the first one, then share this page's link with other players so they can post too.")); }
+      else { empty.appendChild(el("strong", null, "Nothing matches")); empty.appendChild(document.createTextNode("Try another filter or clear the search.")); }
+    } else { empty.hidden = true; }
+  }
+  function card(r, idx) {
+    var isNew = Date.now() - r.ts < NEW_MS, whale = r.price >= 1e9;
+    var c = el("article", "card" + (r.owner === uid ? " mine" : "") + (Date.now() - r.ts > OLD_MS ? " old" : "") + (idx >= 0 ? " enter" : "") + (pulse[r.id] ? " pulse" : ""));
+    if (idx >= 0) c.style.setProperty("--i", String(idx));
+    delete pulse[r.id];
+    var top = el("div", "row");
+    var tags = el("div", "tags");
+    tags.appendChild(el("span", "pill " + r.side, r.side === "sell" ? "Selling" : "Buying"));
+    if (isNew) tags.appendChild(el("span", "badge new", "New"));
+    if (whale) tags.appendChild(el("span", "badge whale", "Whale"));
+    top.appendChild(tags);
+    var age = el("span", "age", ago(r.ts)); age.setAttribute("data-ts", String(r.ts));
+    top.appendChild(age);
+    c.appendChild(top);
+    c.appendChild(el("div", "what", r.what));
+    var p = el("div", "price" + (whale ? " whale" : ""), "$" + shortAmt(r.price));
+    p.appendChild(el("small", null, "$" + full(r.price)));
+    c.appendChild(p);
+    if (r.note) c.appendChild(el("div", "note", r.note));
+    var who = el("div", "who");
+    var ign = el("span", "ign", r.ign);
+    who.appendChild(ign);
+    var btns = el("div", "btns");
+    var cp = el("button", null, "Copy name"); cp.type = "button";
+    cp.addEventListener("click", function () { copyName(r.ign, ign, cp); });
+    btns.appendChild(cp);
+    if (r.owner === uid) {
+      var del = el("button", "del", "Remove"); del.type = "button";
+      del.addEventListener("click", function () { removeItem(r.id); });
+      btns.appendChild(del);
+    }
+    who.appendChild(btns);
+    c.appendChild(who);
+    return c;
+  }
+  function copyName(name, node, btn) {
+    var done = function () {
+      toast("Copied " + name);
+      btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy name"; }, 1200);
+    };
+    var fallback = function () {
+      try { var rg = document.createRange(); rg.selectNodeContents(node); var s = getSelection(); s.removeAllRanges(); s.addRange(rg); } catch (e) {}
+      toast("Name selected, copy it manually");
+    };
+    try { navigator.clipboard.writeText(name).then(done, fallback); } catch (e) { fallback(); }
+  }
+
+  /* ---------- data ---------- */
+  function save(items) {
+    myItems = items;
+    chain = chain.then(function () {
+      return db.doc("offers/" + uid).set({ items: items, updated: Date.now() });
+    }).catch(function (e) {
+      var code = e && e.code;
+      toast(code === "invalid_argument" ? "You need Contributor access to post" : "Could not save, try again");
+    });
+    return chain;
+  }
+  function removeItem(id) {
+    save(myItems.filter(function (i) { return i.id !== id; })).then(function () { toast("Offer removed"); });
+  }
+  function ingest(snap) {
+    var out = [], mine = [], t = 0;
+    snap.docs.forEach(function (d) {
+      var data = d.data() || {};
+      var items = Array.isArray(data.items) ? data.items : [];
+      var any = false;
+      items.forEach(function (i) {
+        if (!i || typeof i.what !== "string" || typeof i.ign !== "string" || typeof i.price !== "number") return;
+        var r = { id: String(i.id), side: i.side === "buy" ? "buy" : "sell", what: i.what, price: i.price, ign: i.ign, note: typeof i.note === "string" ? i.note : "", ts: Number(i.ts) || 0, owner: d.id };
+        out.push(r); any = true;
+        if (d.id === uid) mine.push({ id: r.id, side: r.side, what: r.what, price: r.price, ign: r.ign, note: r.note, ts: r.ts });
+      });
+      if (any) t++;
+    });
+    rows = out; traders = t;
+    if (uid && !snap.metadata.hasPendingWrites) myItems = mine;
+    if (!snap.metadata.fromCache) loaded = true;
+  }
+
+  /* ---------- form ---------- */
+  function updatePreview() {
+    var pv = $("preview"), v = $("price").value.trim();
+    pv.className = "preview";
+    if (!v) { pv.textContent = "Use k, m, b or t after the number."; return; }
+    var n = parseAmt(v);
+    if (n == null) { pv.textContent = "Not a valid amount. Try 750k or 2.5m."; pv.classList.add("bad"); return; }
+    pv.textContent = "$" + full(n); pv.classList.add("ok");
+  }
+  function onSide() {
+    $("priceLbl").textContent = document.querySelector('input[name="side"]:checked').value === "buy" ? "Offer" : "Price";
+  }
+  function submit(ev) {
+    ev.preventDefault();
+    var msg = $("formMsg"); msg.className = "msg"; msg.textContent = "";
+    var side = document.querySelector('input[name="side"]:checked').value;
+    var what = $("what").value.trim(), ign = $("ign").value.trim(), note = $("note").value.trim();
+    var price = parseAmt($("price").value);
+    function bad(t) { msg.className = "msg err"; msg.textContent = t; }
+    if (!uid || !db) return bad("Sign in to post an offer.");
+    if (!what) return bad("Say what you are trading.");
+    if (price == null) return bad("Enter a valid amount, like 750k or 2.5m.");
+    if (!/^\.?[A-Za-z0-9_]{3,16}$/.test(ign)) return bad("Enter your Minecraft username (3 to 16 letters, numbers or _).");
+    if (myItems.length >= MAX_PER_PLAYER) return bad("You have " + MAX_PER_PLAYER + " offers. Remove one first.");
+    lsSet("donut-ign", ign);
+    var item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), side: side, what: what, price: price, ign: ign, note: note, ts: Date.now() };
+    pulse[item.id] = true;
+    var btn = $("postBtn"), br = btn.getBoundingClientRect();
+    btn.disabled = true;
+    burst(br.left + br.width / 2, br.top + br.height / 2);
+    save(myItems.concat([item])).then(function () {
+      btn.disabled = false;
+      $("what").value = ""; $("price").value = ""; $("note").value = ""; updatePreview();
+      toast("Offer posted");
+    });
+  }
+
+  /* ---------- wiring ---------- */
+  document.querySelectorAll(".chip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      view.side = b.getAttribute("data-side");
+      document.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      render({ all: true });
+    });
+  });
+  $("q").addEventListener("input", function (e) { view.q = e.target.value; render(); });
+  $("sort").addEventListener("change", function (e) { view.sort = e.target.value; render({ all: true }); });
+  $("price").addEventListener("input", updatePreview);
+  document.querySelectorAll('input[name="side"]').forEach(function (r) { r.addEventListener("change", onSide); });
+  $("form").addEventListener("submit", submit);
+  $("ign").value = lsGet("donut-ign");
+  try { if (window.matchMedia("(max-width: 859px)").matches) $("postBox").open = false; } catch (e) {}
+
+  /* card tilt follows the mouse */
+  var grid = $("grid");
+  grid.addEventListener("pointermove", function (e) {
+    if (e.pointerType !== "mouse" || !fxOn()) return;
+    var c = e.target.closest && e.target.closest(".card");
+    if (!c) return;
+    var r = c.getBoundingClientRect();
+    c.style.setProperty("--ry", ((e.clientX - r.left) / r.width - 0.5) * 8 + "deg");
+    c.style.setProperty("--rx", -((e.clientY - r.top) / r.height - 0.5) * 8 + "deg");
+  });
+  grid.addEventListener("pointerout", function (e) {
+    var c = e.target.closest && e.target.closest(".card");
+    if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
+  });
+
+  function lockForm(text) {
+    ["what", "price", "ign", "note", "postBtn", "sideSell", "sideBuy"].forEach(function (id) { $(id).disabled = true; });
+    $("formMsg").className = "msg"; $("formMsg").textContent = text;
+  }
+
+  render();
+
+  /* ---------- boot ---------- */
+  var cl = window.claude;
+  if (!cl || !cl.use) { setNotice("The shared board is not available in this view. Open the page from its link to see offers."); lockForm("Posting is unavailable here."); return; }
+  var slow = setTimeout(function () { if (!loaded) setNotice("The board is slow to load. Offers may be out of date."); }, 10000);
+  Promise.all([cl.use("db"), cl.use("user")]).then(function (res) {
+    db = res[0]; var user = res[1];
+    if (!db) { clearTimeout(slow); setNotice("Sign in to claude.ai to see and post offers."); lockForm("Sign in to post an offer."); return; }
+    var idP = user ? user.id() : Promise.resolve(null);
+    var canP = user ? user.can("data.write") : Promise.resolve(null);
+    return Promise.all([idP, canP]).then(function (v) {
+      uid = v[0]; canWrite = v[1] !== false;
+      if (!uid) lockForm("Sign in to post an offer.");
+      else if (!canWrite) lockForm("You can view the board. Ask the page owner for Contributor access to post.");
+      db.collection("offers").onSnapshot(function (snap) {
+        ingest(snap);
+        if (loaded) { clearTimeout(slow); setNotice(""); }
+        var all = loaded && firstLoad;
+        if (loaded) firstLoad = false;
+        render({ all: all });
+      }, function (e) {
+        clearTimeout(slow);
+        setNotice(e && e.code === "revoked" ? "Access to this board was removed." : "Could not load the board. Reload the page to try again.");
+      });
+    });
+  });
+  setInterval(function () {
+    document.querySelectorAll(".age[data-ts]").forEach(function (a) { a.textContent = ago(Number(a.getAttribute("data-ts"))); });
+  }, 60000);
+})();
+</script>
+
+</body></html>
